@@ -1,0 +1,599 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html" ; charset="UTF-8">
+</head>
+<body onload="on_load()">
+
+
+<script language=javascript>
+
+/**
+ * generator idNo accord it's pre 17 bits numbers
+ */
+function generator_idNo(idNo){
+		//check date
+		var dateStr = idNo.substr(6, 8);
+		var yearStr = dateStr.substr(0, 4);
+		var monthStr = dateStr.substr(4, 2);
+		var dayStr = dateStr.substr(6);
+
+		var weightNums = new Array(7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2);
+
+		var complimentMapping = new Array(
+			new Array(0, "1")
+		  , new Array(1, "0")
+		  , new Array(2, "X")
+		  , new Array(3, "9")
+		  , new Array(4, "8")
+		  , new Array(5, "7")
+		  , new Array(6, "6")
+		  , new Array(7, "5")
+		  , new Array(8, "4")
+		  , new Array(9, "3")
+		  , new Array(10, "2")
+		);
+
+		var sum = 0;
+
+		for(var i = 0; i < 17; i++){
+		   var tempValue = parseInt(idNo.substr(i, 1), 10);
+		   sum += (tempValue * weightNums[i]);
+		}
+
+		var compliment = (sum % 11);
+		var mappingValue = complimentMapping[compliment][1];
+
+		return idNo + mappingValue;
+}
+
+/**
+ * is valid date or not
+ */
+function isDate(day, month, year){
+	month = month - 1;
+	var testDate = new Date();
+	testDate.setFullYear(year);
+	testDate.setMonth(month);
+	testDate.setDate(day);
+	if ((testDate.getFullYear() == year) && (month == testDate.getMonth()) && (day == testDate.getDate())){
+		return true;
+	}else{
+		return false
+	}
+}
+
+
+/**
+ *check data valid or not
+ */
+function send_idNo(){
+
+	var areaCode = document.form1.areaCode.value;
+	var birthday = document.form1.birthday.value;
+	var random = document.form1.random.value;
+
+             //check areaNo
+	if(areaCode.replace(/\s/g, "").length < 6){
+		document.form1.areaCode.focus();
+		alert("地区号码长度不正确!");
+		return;
+	}else{
+	    areaCode = areaCode.replace(/\s/g, "");
+		var rgexp1 = /^\d{6}$/g;
+		if(!rgexp1.test(areaCode)){
+		     document.form1.areaCode.focus();
+		     alert("地区号码应该为数字!");
+		     return;
+		}
+	}
+
+	//check birthday
+	if(birthday.replace(/\s/g, "").length < 8){
+		document.form1.birthday.focus();
+		alert("出生日期长度不正确!");
+		return;
+	}else{
+	    birthday = birthday.replace(/\s/g, "");
+	    var rgexp2 = /^\d{8}$/g;
+	    if(!rgexp2.test(birthday)){
+			document.form1.birthday.focus();
+			alert("出生日期应该为数字!");
+			return;
+		}else{
+			var yearStr = birthday.substr(0, 4);
+			var monthStr = birthday.substr(4, 2);
+			var dayStr = birthday.substr(6);
+			if(!isDate(parseInt(dayStr, 10), parseInt(monthStr, 10), parseInt(yearStr, 10))){
+				document.form1.birthday.focus();
+				alert("出生日期不是合法日期!");
+				return;
+			}
+		}
+	}
+
+	//check randomNo
+	if(random.replace(/\s/g, "").length < 3){
+		document.form1.random.focus();
+		alert("随机号码长度不正确!");
+		return;
+	}else{
+		random = random.replace(/\s/g, "");
+		var rgexp3 = /^\d{3}$/g;
+	    if(!rgexp3.test(random)){
+			document.form1.random.focus();
+			alert("随机号码应该为数字!");
+			return;
+		}
+	}
+
+
+
+	var preIdNo = areaCode + birthday + random;
+             var afterIdNo = generator_idNo(preIdNo);
+
+             document.form1.idNo.value = afterIdNo;
+
+	//set gener
+	if(parseInt(random, 10)%2==0){
+	   document.form1.gener.value = "女";
+	}else{
+	   document.form1.gener.value = "男";
+	}
+}
+
+
+/**
+ *check input is number or not
+ */
+   function check_num(){
+	var keyCode = window.event.keyCode;
+	if(keyCode < 48 || keyCode > 57){
+	   return false;
+	}
+}
+
+
+
+/**
+ * on load init some variables
+ */
+function on_load(){
+    //init areaNo
+    var random2 = Math.floor(Math.random()*1000000);
+	var randomStr2 = "222222" + random2;
+	var postRandom2 = randomStr2.substr(randomStr2.length - 4);
+	
+
+	document.form1.areaCode.value = "110113";
+	
+	
+	//init birthday
+	var currdate = new Date();
+	currdate.setFullYear(currdate.getFullYear() - 18);
+	var randomDate = Math.floor(Math.random()*10000);
+	currdate.setDate(currdate.getDate() - randomDate);
+	            
+	var initBirthday = currdate.getFullYear() + "" + ((currdate.getMonth() + 1) < 10 ? "0" 
+				+ (currdate.getMonth() + 1) : (currdate.getMonth() + 1)) + "" 
+				+ (currdate.getDate() < 10 ? "0" + currdate.getDate() : currdate.getDate());
+				
+	document.form1.birthday.value = initBirthday;
+	
+	//init randomNo
+	var random = Math.floor(Math.random()*1000);
+	var randomStr = "000" + random;
+	var postRandom = randomStr.substr(randomStr.length - 3);
+	document.form1.random.value = postRandom;
+	
+	var areaCode = document.form1.areaCode.value;
+	var birthday = document.form1.birthday.value;
+	var random = document.form1.random.value;
+	
+	var preIdNo = areaCode + birthday + random;
+	
+	var afterIdNo = generator_idNo(preIdNo);
+	
+	document.form1.idNo.value = afterIdNo;
+	
+	if(parseInt(random, 10)%2==0){
+	     document.form1.gener.value = "女";
+	}else{
+	     document.form1.gener.value = "男";
+	}
+	mkCpId();
+	var random = Math.floor(Math.random()*100000000000000000);
+	while(random.length<16){
+		random = Math.floor(Math.random()*100000000000000000);
+	}
+	var ph = Math.floor(Math.random()*1000000000)+"";
+	document.form1.phone.value="138"+ph.substr(0,8);
+	var bankNoValue=genBankCardNo();
+	document.form1.bankCardNo.value=bankNoValue;
+var vName=getName();
+
+            document.form1.virName.value=vName;
+
+}
+
+function mkCpId(){
+   //init areaNo
+    var aaa =  Math.floor(Math.random()*1000000000)+"";
+	while(aaa.length != 9){
+		aaa = Math.floor(Math.random()*1000000000)+"";
+	}
+	document.form1.Code.value = aaa;
+
+	var ttt = Math.floor(Math.random()*10000000000000000)+"";
+	while(ttt.length != 16){
+		ttt = Math.floor(Math.random()*10000000000000000)+"";
+	}
+	document.form1.LoanCard.value = ttt;
+
+
+
+          var s=Math.floor(Math.random()*100)+"";
+	while(s.length != 2){
+		s = Math.floor(Math.random()*100)+"";
+	}
+	mtdCal(document.form1.Code);
+	mtdCal2();
+	document.form1.LoanCardResult1.value=document.form1.LoanCardResult1.value+s;
+}
+
+
+function mtdCal(Code)
+{
+	var strErrMsg = "Code Format is Wrong!!";
+	var strInput = Code.value;
+
+	if (strInput.length != 9 && strInput.length != 8)
+	{
+		alert("请输入最少8个数字");
+		return;
+	}
+
+	var intI;
+	var intTotal = 0;
+	var intWeight = new Array(3, 7, 9, 10, 5, 8, 4, 2);
+	for (var intJ = 0; intJ <= 7; intJ++)
+	{
+		intI = strInput.toUpperCase().charCodeAt(intJ);
+		if (intI >= 48 && intI <= 57)
+		{
+			intI = intI - 48;
+		}
+		else if (intI >= 65 && intI <= 90)
+		{
+			intI = intI - 55;
+		}
+
+		intTotal = intTotal + (intI * intWeight[intJ]);
+	}
+
+	var intRemain = intTotal - (parseInt(intTotal / 11, 10) * 11);
+	if (intRemain == 1)
+	{
+		strResult = 'X';
+	}
+	else if (intRemain == 0)
+	{
+		strResult = '0';
+	}
+	else
+	{
+		strResult = 11 - intRemain;
+	}
+
+	document.form1.Result1.value = strInput.substr(0, 8);
+	document.form1.Result2.value = strResult;
+}
+
+function mtdCal2()
+{
+	var strInput = document.form1.LoanCard.value;
+	if (strInput.length != 16)
+	{
+		alert("请输入16个数字");
+		return;
+	}
+
+	var intWeight = new Array(1, 3, 5, 7, 11, 2, 13, 1, 1, 17, 19, 97, 23, 29);
+	var intTotal = 0;
+	var intI;
+	var strTemp;
+
+	for (var intJ = 0; intJ <= 13; intJ++)
+	{
+		intI = strInput.toUpperCase().charCodeAt(intJ);
+
+		if (intI >= 65 && intI <= 90)
+			intI = (intI - 65) + 10;
+		else if (intI >= 48 && intI <= 57)
+			intI = intI - 48;
+		else
+			return false;
+
+		intTotal += intWeight[intJ] * intI;
+	}
+
+	strTemp = 1 + intTotal % 97;
+
+	strResult = strInput.substr(0, 14);
+
+	if (strTemp < 10)
+		strResult = strResult + "0" + strTemp;
+	else
+		strResult = strResult + "" + ((strTemp - (strTemp % 10)) / 10) + (strTemp % 10);
+	document.form1.LoanCardResult1.value = strResult;
+}
+
+function genBancsCd(s){
+  var ai="[['10','9','8','7','6','5','4','3','2'],['5','10','4','9','3','8','2','7','1'],['8','5','2','10','7','4','1','9','6'],[4,'8','1','5','9','2','6','10','3'],['2','4','6','8','10','1','3','5','7'],['1','2','3','4','5','6','7','8','9'],['6','1','7','2','8','3','9','4','10'],['3','6','9','1','4','7','10','2','5'],['7','3','10','6','2','9','5','1','8'],['9','7','5','3','1','10','8','6','4'],['10','9','8','7','6','5','4','3','2'],['5','10','4','9','3','8','2','7',1],['8','5','2','10','7','4','1','9','6'],['4','8','1','5','9','2','6','10','3'],['2','4','6','8','10','1','3','5','7'],['1','2','3','4','5','6','7','8','9']]";
+	var k = 0;
+	var i1 = 0;
+	var ai1 = new Array(17);  
+	s = s + "0";
+	var ac = new Array(17); 
+	for(var sl=0;sl<s.length;sl++){
+		ac[sl] = s.substring(sl,sl+1);
+	}
+	eval("var aiArray="+ai);
+	ai1 = ac;
+	var k = 0;
+	for (var i = 15; i >= 0; i--)
+			if (ai1[i] != 0)
+			{
+				var j = ai1[i] - 1;
+				k = k + aiArray[i][j]*1;
+			}
+	if (k == 0)
+	{
+			ac[16] = 0;
+			return ac.join("");
+	}
+	var l = k % 10;
+	var i1 = l % 10;
+	for (var k1 = 0; k1 < 16; k1++)
+			ac[k1] = ai1[k1].substring(0,1);
+	ac[16] = (i1+ '').substring(0,1);
+  return ac.join("");
+}
+	 //获取银行卡号不包括LunmCode
+	        function getBankCardWithoutLunmCode(bank_no) {
+            // bank_no 银行代码
+            //控制位数. 19位的银行卡 cardinalNumber=12. 16位的银行卡 cardinalNumber=9
+            var cardinalNumber = 12;
+            var prefix = "";
+            switch (bank_no) {
+                case "102":
+                    prefix = "622202";
+                    break;
+                case "103":
+                    prefix = "622848";
+                    break;
+                case "105":
+                    prefix = "622700";
+                    break;
+                case "301":
+                    prefix = "622262";
+                    break;
+                case "104":
+                    prefix = "621661";
+                    break;
+                case "303":
+                    prefix = "622666";
+                    cardinalNumber = 9;
+                    break;
+                case "305":
+                    prefix = "622622";
+                    break;
+                case "306":
+                    prefix = "622556";
+                    break;
+                case "308":
+                    prefix = "622588";
+                    cardinalNumber = 9;
+                    break;
+                case "410":
+                    prefix = "622155";
+                    break;
+                case "302":
+                    prefix = "622689";
+                    break;
+                case "304":
+                    prefix = "622630";
+                    break;
+                case "309":
+                    prefix = "622908";
+                    break;
+                case "310":
+                    prefix = "621717";
+                    break;
+                case "315":
+                    prefix = "622323";
+                    break;
+                case "316":
+                    prefix = "622309";
+                    break;
+                default:
+                    return '';
+            }
+   
+            //生成不包括Luhm校验码的银行卡号
+            var bankCardWithoutLunmCode = prefix;
+            for (var j = 0; j < cardinalNumber; j++) {
+                bankCardWithoutLunmCode += Math.floor(Math.random() * 10);
+            }
+   
+            console.log(prefix);
+            console.log(bankCardWithoutLunmCode);
+   
+            return bankCardWithoutLunmCode;
+        }
+   
+   
+        // 获取Luhn Code
+        function getLuhnCode(bankCardWithoutLunmCode) {
+            if (bankCardWithoutLunmCode == '') return '';
+            var no = bankCardWithoutLunmCode.split('').reverse().join('');
+   
+            // 定义奇数/偶数数据
+            var addArr = new Array();
+            var evenArr = new Array();
+   
+            // 奇数/偶数数组分开
+            for (var i = 0; i < no.length; i++) {
+                if (i % 2 == 0) {
+                    addArr[i / 2] = no[i];
+                } else {
+                    evenArr[(i - 1) / 2] = no[i];
+                }
+            }
+   
+            //奇数数组内容x2
+            // 如果乘以2得到的数字是两位,把这两位相加得到一位数字.
+            // 如果相加后的内容时两位数,减去9.
+            for (var i = 0; i < addArr.length; i++) {
+                var temp = parseInt(addArr[i]) * 2;
+                if (temp > 9) {
+                    temp = parseInt(String(temp).charAt(0)) + parseInt(String(temp).charAt(1));
+                    if (temp > 9) {
+                        temp = temp - 9;
+                    }
+                }
+                addArr[i] = temp;
+            }
+   
+   
+            //两个数组合并
+            var arr = addArr.concat(evenArr);
+            var oddEvenCount = 0;
+   
+            for (var i = 0; i < arr.length; i++) {
+                oddEvenCount += parseInt(arr[i]);
+            }
+   
+            console.log(oddEvenCount);
+   
+            //生成Lnhn code
+   
+            var LuhnCode = oddEvenCount % 10 == 0 ? 0 : (10 - oddEvenCount % 10);
+   
+            console.log(LuhnCode);
+   
+            return LuhnCode;
+   
+        }
+   
+        function getBankCard(bank_no) {
+            var bankCardWithoutLunmCode = getBankCardWithoutLunmCode(bank_no);
+            var bankCard = bankCardWithoutLunmCode + getLuhnCode(bankCardWithoutLunmCode) + "";
+   
+            console.log("银行卡号:", bankCard);
+   
+            return bankCard;
+   
+        }
+        function genBankCardNo() {
+            // 获取select的选中项
+            var checkedBankNo = document.getElementsByName("bank_no")[0].value;
+                // 获取卡号文本框
+                var bankcard = document.getElementById("bankcard");
+                // 获取select的选中项
+                var checkedBankNo = document.getElementsByName("bank_no")[0].value;
+ var bankCardWithoutLunmCode = getBankCardWithoutLunmCode(checkedBankNo);
+            var bankCard = bankCardWithoutLunmCode + getLuhnCode(bankCardWithoutLunmCode) + "";
+   
+            console.log("银行卡号:", bankCard);
+            
+               	document.form1.bankCardNo.value =bankCard;
+   return bankCard;
+        }
+ function getName() {
+            var familyNames = new Array(
+                "赵", "钱", "孙", "李", "周", "吴", "郑", "王", "冯", "陈",
+                "褚", "卫", "蒋", "沈", "韩", "杨", "朱", "秦", "尤", "许",
+                "何", "吕", "施", "张", "孔", "曹", "严", "华", "金", "魏",
+                "陶", "姜", "戚", "谢", "邹", "喻", "柏", "水", "窦", "章",
+                "云", "苏", "潘", "葛", "奚", "范", "彭", "郎", "鲁", "韦",
+                "昌", "马", "苗", "凤", "花", "方", "俞", "任", "袁", "柳",
+                "酆", "鲍", "史", "唐", "费", "廉", "岑", "薛", "雷", "贺",
+                "倪", "汤", "滕", "殷", "罗", "毕", "郝", "邬", "安", "常",
+                "乐", "于", "时", "傅", "皮", "卞", "齐", "康", "伍", "余",
+                "元", "卜", "顾", "孟", "平", "黄", "和", "穆", "萧", "尹"
+            );
+            var givenNames = new Array(
+                "子璇", "淼", "国栋", "夫子", "瑞堂", "甜", "敏", "尚", "国贤", "贺祥", "晨涛",
+                "昊轩", "易轩", "益辰", "益帆", "益冉", "瑾春", "瑾昆", "春齐", "杨", "文昊",
+                "东东", "雄霖", "浩晨", "熙涵", "溶溶", "冰枫", "欣欣", "宜豪", "欣慧", "建政",
+                "美欣", "淑慧", "文轩", "文杰", "欣源", "忠林", "榕润", "欣汝", "慧嘉", "新建",
+                "建林", "亦菲", "林", "冰洁", "佳欣", "涵涵", "禹辰", "淳美", "泽惠", "伟洋",
+                "涵越", "润丽", "翔", "淑华", "晶莹", "凌晶", "苒溪", "雨涵", "嘉怡", "佳毅",
+                "子辰", "佳琪", "紫轩", "瑞辰", "昕蕊", "萌", "明远", "欣宜", "泽远", "欣怡",
+                "佳怡", "佳惠", "晨茜", "晨璐", "运昊", "汝鑫", "淑君", "晶滢", "润莎", "榕汕",
+                "佳钰", "佳玉", "晓庆", "一鸣", "语晨", "添池", "添昊", "雨泽", "雅晗", "雅涵",
+                "清妍", "诗悦", "嘉乐", "晨涵", "天赫", "玥傲", "佳昊", "天昊", "萌萌", "若萌"
+            );
+            var i = parseInt(Math.random() * 100);
+            var familyName = familyNames[i];
+            var j = parseInt(Math.random() * 100);
+            var givenName = givenNames[i];
+            var name = familyName + givenName;
+            console.log("姓名", name);
+            document.form1.virName.value=name;
+return name;
+        }
+</script>
+
+<form name="form1">
+<b>组织机构代码</b>&nbsp;&nbsp; 
+<input type=hidden id=Code size=10 maxlength=9>&nbsp;&nbsp;&nbsp;&nbsp; 
+<input type=text id=Result1 size=10 maxlength=8 readonly >&nbsp;-&nbsp;
+<input type=text id=Result2 size=2 maxlength=1 readonly>
+<hr>
+
+
+<b>贷款卡</b>&nbsp;&nbsp; 
+<input type=hidden id=LoanCard size=18 maxlength=16 />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type=text id=LoanCardResult1 size=25 maxlength=18 readonly >
+<hr>
+<b>姓名</b>
+<input type=text id=virName size=20 maxlength=11 readonly >
+<b>手机</b>
+<input type=text id=phone size=20 maxlength=11 readonly >
+<b>出生日期(8位)</b>&nbsp; 
+<input type="text" name="birthday" size=12 maxlength="8" value="19840102" onkeypress="return check_num();"  />&nbsp;[如:19840102]<p>
+<b>性别</b>&nbsp; 
+<input type="text" name="gener" size="1" readonly>
+<input type="hidden" name="areaCode" size="6" maxlength="6" value="223845" onkeypress="return check_num();"  />
+<input type="hidden" name="random" size="3" maxlength="3" onkeypress="return check_num();" /><!--  &nbsp;[奇数为男性, 偶数为女性]--> <p>
+<b>身份证号(18位)</b>&nbsp; 
+<input type="text" name="idNo" size=22 readonly >
+<hr>
+<b>选择银行</b>&nbsp; 
+	            <select name="bank_no" id="">
+	                <option value="104">中国银行</option>
+	                <option value="103">农业银行</option>
+	                <option value="102">工商银行</option>
+	                <option value="105">建设银行</option>
+	                <option value="301">交通银行</option>
+	                <option value="100">中国邮政储蓄银行</option>
+	                <option value="308">招商银行</option>
+	                <option value="310">浦发银行</option>
+	                <option value="309">兴业银行</option>
+	                <option value="303">光大银行</option>
+	                <option value="306">广发银行</option>
+	                <option value="304">华夏银行</option>
+	                <option value="305">民生银行</option>
+	                <option value="302">中信银行</option>
+	            </select>
+	            <input id="bankCardNo" type="text" size="30"readonly>
+	     <hr>
+<input id="start" type="button" style="width:700;height:300" name="generator" value="&nbsp;重&nbsp;新&nbsp;生&nbsp;成&nbsp;" onclick="on_load();">
+<hr>
+
+<div id="Layer1" >
+</div>
+</form>
+</body>
+</html>
